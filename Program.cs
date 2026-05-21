@@ -29,6 +29,25 @@ while (gameRunning) // Main menu loop
 			Console.Clear();
 			player.ShowInfo();
 			Console.WriteLine();
+			Console.WriteLine("Press any key to start your first fight.");
+			Console.ReadKey();
+
+			Enemy goblin = new Enemy("Goblin", 50, 5, 10, 2);
+			CombatSystem combatSystem = new CombatSystem();
+
+			bool playerWon = combatSystem.StartFight(player, goblin);
+
+			Console.Clear();
+
+			if (playerWon)
+			{
+				Console.WriteLine("You survived the first fight!");
+			}
+			else
+			{
+				Console.WriteLine("Game over. You lost the first fight.");
+			}
+
 			Console.WriteLine("Press any key to return to the menu.");
 			Console.ReadKey();
 			break;
