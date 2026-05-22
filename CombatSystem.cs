@@ -7,10 +7,12 @@ namespace AlleBesiegen
 		private Random random = new Random(); // Random number generator for damage calculations
 
 		public bool StartFight(Player player, Enemy enemy) // Returns true if player wins, false if player loses
-		{
+		{	
 			Console.Clear();
 			Console.WriteLine($"⚔️ A wild {enemy.Name} appears!");
 			Console.WriteLine();
+
+			bool playerDefending = false; // Track if player is defending to apply damage reduction
 
 			while (player.IsAlive() && enemy.IsAlive())
 			{
@@ -28,9 +30,11 @@ namespace AlleBesiegen
 				{
 					PlayerAttack(player, enemy);
 				}
-				else if (choice == "2")
+				else if (choice == "2") // Player chooses to defend, which will reduce damage from the next enemy attack
 				{
-					PlayerDefend(player, enemy);
+					Console.WriteLine();
+					Console.WriteLine($"🛡️ {player.Name} prepares to defend!");
+					playerDefending = true;
 				}
 				else if (choice == "3")
 				{
@@ -53,7 +57,8 @@ namespace AlleBesiegen
 					break;
 				}
 
-				EnemyAttack(player, enemy);
+				EnemyRandomAction(player, enemy, playerDefending);
+				playerDefending = false;
 
 				WaitForKey();
 				Console.Clear();
@@ -103,6 +108,79 @@ namespace AlleBesiegen
 			Console.WriteLine($"💥 {enemy.Name} attacks!");
 
 			player.TakeDamage(damage);
+		}
+
+		private void EnemyRandomAction(Player player, Enemy enemy, bool playerDefending) // Enemy randomly chooses to perform a weak attack, strong attack or defend
+		{
+			int action = random.Next(1, 4); // 1, 2 or 3
+
+			if (action == 1)
+			{
+				EnemyWeakAttack(player, enemy, playerDefending);
+			}
+			else if (action == 2)
+			{
+				EnemyStrongAttack(player, enemy, playerDefending);
+			}
+			else if (action == 3)
+			{
+				EnemyDefend(enemy);
+			}
+		}
+
+		private void EnemyWeakAttack(Player player, Enemy enemy, bool playerDefending) //
+		{
+			int damage = random.Next(enemy.MinDamage, enemy.MaxDamage + 1);
+			damage = damage / 2;
+
+			if (damage < 1)
+			{
+				damage = 1;
+			}
+
+			Console.WriteLine();
+			Console.WriteLine($"👹 {enemy.Name} uses a weak attack!");
+
+			if (playerDefending) // If player is defending, apply reduced damage
+			{
+				player.TakeReducedDamage(damage);
+			}
+			else
+			{
+				player.TakeDamage(damage);
+			}
+		}
+		private void EnemyStrongAttack(Player player, Enemy enemy, bool playerDefending) // Strong attack has a 75% chance to hit and deals more damage than a normal attack( 75% weil es imba ist)
+		{
+			int hitChance = random.Next(1, 101);
+
+			Console.WriteLine();
+			Console.WriteLine($"💥 {enemy.Name} tries a strong attack!");
+
+			if (hitChance <= 75)
+			{
+				int damage = random.Next(enemy.MaxDamage, enemy.MaxDamage + 8);
+
+				if (playerDefending)
+				{
+					player.TakeReducedDamage(damage);
+				}
+				else
+				{
+					player.TakeDamage(damage);
+				}
+			}
+			else
+			{
+				Console.WriteLine($"{enemy.Name} missed the strong attack!");
+			}
+		}
+		private void EnemyDefend(Enemy enemy) // Enemy increases its defense for the next turn, which will reduce damage taken from the player's next attack
+		{
+			enemy.Defense += 2;
+
+			Console.WriteLine();
+			Console.WriteLine($"🛡️ {enemy.Name} increases defense by 2!");
 		}
 
 		private void ShowFightStatus(Player player, Enemy enemy) // Display current health of player and enemy
