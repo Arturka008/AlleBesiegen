@@ -26,7 +26,7 @@ namespace AlleBesiegen
 		{
 			Name = name;
 			Class = heroClass;
-			Gold = 0;
+			//Gold = 0;
 
 			if (heroClass == HeroClass.Warrior)
 			{
@@ -61,7 +61,7 @@ namespace AlleBesiegen
 			Console.WriteLine($"💖 Health: {Health}/{MaxHealth}");
 			Console.WriteLine($"⚔️ Damage: {MinDamage}-{MaxDamage}");
 			Console.WriteLine($"🛡️ Armor: {Armor}");
-			Console.WriteLine($"💰 Gold: {Gold}");
+			//Console.WriteLine($"💰 Gold: {Gold}");
 		}
 		public void TakeDamage(int damage) // Method to apply damage to the player, considering armor
 		{

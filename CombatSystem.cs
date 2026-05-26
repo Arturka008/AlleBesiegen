@@ -67,8 +67,8 @@ namespace AlleBesiegen
 			if (player.IsAlive())
 			{
 				Console.WriteLine($"✅ You defeated {enemy.Name}!");
-				player.Gold += 10;
-				Console.WriteLine("💰 You received 10 gold!");
+				//player.Gold += 10;
+				//Console.WriteLine("💰 You received 10 gold!");
 				WaitForKey();
 				return true;
 			}

@@ -28,28 +28,13 @@ while (gameRunning) // Main menu loop
 			Player player = CreatePlayer();
 			Console.Clear();
 			player.ShowInfo();
+
 			Console.WriteLine();
-			Console.WriteLine("Press any key to start your first fight.");
+			Console.WriteLine("Press any key to start the dungeon.");
 			Console.ReadKey();
 
-			Enemy goblin = new Enemy("Goblin", 50, 5, 10, 2);
-			CombatSystem combatSystem = new CombatSystem();
+			StartDungeon(player);
 
-			bool playerWon = combatSystem.StartFight(player, goblin);
-
-			Console.Clear();
-
-			if (playerWon)
-			{
-				Console.WriteLine("You survived the first fight!");
-			}
-			else
-			{
-				Console.WriteLine("Game over. You lost the first fight.");
-			}
-
-			Console.WriteLine("Press any key to return to the menu.");
-			Console.ReadKey();
 			break;
 
 		case "2":
@@ -133,5 +118,80 @@ while (gameRunning) // Main menu loop
 		Console.ReadKey();
 
 		return player;
+	}
+	static void StartDungeon(Player player) // Main dungeon loop where player fights through 4 floors of enemies
+	{
+		CombatSystem combatSystem = new CombatSystem();
+		RewardSystem rewardSystem = new RewardSystem();
+
+		for (int floor = 1; floor <= 4; floor++)
+		{
+			Console.Clear();
+			Console.WriteLine($"===== Floor {floor} =====");
+			Console.WriteLine();
+
+			Enemy enemy;
+
+			if (floor == 1)
+			{
+				enemy = new Enemy("Goblin", 50, 5, 10, 2);
+			}
+			else if (floor == 2)
+			{
+				enemy = new Enemy("Skeleton", 70, 7, 13, 3);
+			}
+			else if (floor == 3)
+			{
+				enemy = new Enemy("Dark Knight", 95, 9, 16, 5);
+			}
+			else
+			{
+				enemy = new Enemy("Boss", 140, 12, 22, 7);
+				Console.WriteLine("Boss appears!");
+			}
+
+			Console.WriteLine($"Enemy: {enemy.Name}");
+			Console.WriteLine("Press any key to start the fight.");
+			Console.ReadKey();
+
+			bool playerWon = combatSystem.StartFight(player, enemy);
+
+			if (!playerWon)
+			{
+				Console.Clear();
+				Console.WriteLine("Game Over!");
+				Console.WriteLine($"You were defeated on floor {floor}.");
+				Console.WriteLine();
+				Console.WriteLine("Press any key to return to the menu.");
+				Console.ReadKey();
+				return;
+			}
+
+			Console.Clear();
+
+			if (floor < 4)
+			{
+				Console.WriteLine($"Floor {floor} cleared!");
+				Console.WriteLine("You can choose a reward.");
+				Console.WriteLine();
+				Console.WriteLine("Press any key to continue.");
+				Console.ReadKey();
+
+				rewardSystem.ChooseReward(player);
+			}
+			else
+			{
+				Console.WriteLine("Congratulations!");
+				Console.WriteLine("You defeated the Final Boss and cleared the dungeon!");
+				Console.WriteLine();
+				Console.WriteLine("Final character status:");
+				Console.WriteLine();
+				player.ShowInfo();
+
+				Console.WriteLine();
+				Console.WriteLine("Press any key to return to the menu.");
+				Console.ReadKey();
+			}
+		}
 	}
 }
