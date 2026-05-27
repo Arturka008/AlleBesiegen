@@ -4,18 +4,25 @@ namespace AlleBesiegen
 {
 	public class RewardSystem
 	{
+		private Random random = new Random(); // Random number generator for reward values
+
 		public void ChooseReward(Player player)
+
 		{
 			bool rewardChosen = false;
+
+			int healAmount = random.Next(25, 50); // 25 to 50 HP
+			int damageBonus = random.Next(1, 4); // 1 to 3 max damage
+			int armorBonus = random.Next(1, 3); // 1 to 2 armor
 
 			while (!rewardChosen)
 			{
 				Console.Clear();
 				Console.WriteLine("===== 🎁 Choose Your Reward =====");
 				Console.WriteLine();
-				Console.WriteLine("1. 💖 Heal 25 HP");
-				Console.WriteLine("2. ⚔️ Increase max damage by 2");
-				Console.WriteLine("3. 🛡️ Increase armor by 1");
+				Console.WriteLine($"1. 💖 Heal {healAmount} HP");
+				Console.WriteLine($"2. ⚔️ Increase max damage by {damageBonus}");
+				Console.WriteLine($"3. 🛡️ Increase armor by {armorBonus}");
 				Console.WriteLine();
 				Console.Write("Your choice: ");
 
@@ -23,19 +30,21 @@ namespace AlleBesiegen
 
 				if (choice == "1")
 				{
-					player.Heal(25);
+					player.Heal(healAmount);
 					rewardChosen = true;
 				}
 				else if (choice == "2")
 				{
-					player.MaxDamage += 2;
-					Console.WriteLine($"⚔️ Max damage increased to {player.MaxDamage}!");
+					player.MaxDamage += damageBonus;
+					Console.WriteLine($"⚔️ Max damage increased by {damageBonus}!");
+					Console.WriteLine($"New max damage: {player.MaxDamage}");
 					rewardChosen = true;
 				}
 				else if (choice == "3")
 				{
-					player.Armor += 1;
-					Console.WriteLine($"🛡️ Armor increased to {player.Armor}!");
+					player.Armor += armorBonus;
+					Console.WriteLine($"🛡️ Armor increased by {armorBonus}!");
+					Console.WriteLine($"New armor: {player.Armor}");
 					rewardChosen = true;
 				}
 				else

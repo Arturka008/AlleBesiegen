@@ -23,7 +23,7 @@ while (gameRunning) // Main menu loop
 
 	switch (choice) // Handle menu choices
 	{
-		case "1":
+		case "1": // Start a new game by creating a new player and starting the dungeon
 			Console.Clear();
 			Player player = CreatePlayer();
 			Console.Clear();
@@ -37,19 +37,68 @@ while (gameRunning) // Main menu loop
 
 			break;
 
-		case "2":
+		case "2": // Load a saved game by reading player data from a file and starting the dungeon with that player
 			Console.Clear();
-			Console.WriteLine("Load game is not available yet.");
-			Console.WriteLine("Press any key to continue.");
-			Console.ReadKey();
+
+			SaveSystem saveSystem = new SaveSystem();
+			Player loadedPlayer = saveSystem.LoadGame();
+
+			if (loadedPlayer != null)
+			{
+				Console.WriteLine();
+				loadedPlayer.ShowInfo();
+
+				Console.WriteLine();
+				Console.WriteLine("Press any key to continue your dungeon.");
+				Console.ReadKey();
+
+				StartDungeon(loadedPlayer);
+			}
+			else
+			{
+				Console.WriteLine();
+				Console.WriteLine("Press any key to return to the menu.");
+				Console.ReadKey();
+			}
+
 			break;
 
-		case "3":
+		case "3": // Show the game rules and instructions for how to play, including the goal of the game, hero classes, combat mechanics, enemy intent, rewards and save/load functionality
 			Console.Clear();
 			Console.WriteLine("=== 📖 Rules ===");
-			Console.WriteLine("Choose a hero class.");
-			Console.WriteLine("Fight enemies in turn-based battles.");
-			Console.WriteLine("Defeat all enemies and the final boss.");
+			Console.WriteLine();
+			Console.WriteLine("🎯 Goal:");
+			Console.WriteLine("Defeat all enemies on the floors and beat the final boss.");
+			Console.WriteLine();
+			Console.WriteLine("🧙 Hero Classes:");
+			Console.WriteLine("Warrior - high health and armor.");
+			Console.WriteLine("Mage - high damage but low armor.");
+			Console.WriteLine("Rogue - balanced and flexible.");
+			Console.WriteLine();
+			Console.WriteLine("⚔️ Combat:");
+			Console.WriteLine("The game uses a turn-based combat system.");
+			Console.WriteLine("Each round you can attack, defend or show player info.");
+			Console.WriteLine();
+			Console.WriteLine("👹 Enemy Intent:");
+			Console.WriteLine("Before your action, you can see what the enemy wants to do.");
+			Console.WriteLine("The enemy can use a weak attack, a strong attack or defend.");
+			Console.WriteLine();
+			Console.WriteLine("💥 Strong Attack:");
+			Console.WriteLine("A strong attack deals more damage than a normal attack.");
+			Console.WriteLine("But it has only a 75% chance to hit.");
+			Console.WriteLine("That means there is also a 25% chance to miss.");
+			Console.WriteLine();
+			Console.WriteLine("🛡️ Defense:");
+			Console.WriteLine("If you defend, the damage from the enemy is reduced.");
+			Console.WriteLine("If the enemy defends, your damage is reduced in this round.");
+			Console.WriteLine();
+			Console.WriteLine("🎁 Rewards:");
+			Console.WriteLine("After clearing a floor, you can choose a reward.");
+			Console.WriteLine("Rewards can heal you, increase your damage or increase your armor.");
+			Console.WriteLine();
+			Console.WriteLine("💾 Save and Load:");
+			Console.WriteLine("The game saves your character and current floor.");
+			Console.WriteLine("You can continue later with Load Game.");
 			Console.WriteLine();
 			Console.WriteLine("Press any key to return to the menu.");
 			Console.ReadKey();
@@ -123,8 +172,9 @@ while (gameRunning) // Main menu loop
 	{
 		CombatSystem combatSystem = new CombatSystem();
 		RewardSystem rewardSystem = new RewardSystem();
+		SaveSystem saveSystem = new SaveSystem();
 
-		for (int floor = 1; floor <= 4; floor++)
+		for (int floor = player.CurrentFloor; floor <= 6; floor++) 
 		{
 			Console.Clear();
 			Console.WriteLine($"===== Floor {floor} =====");
@@ -132,21 +182,29 @@ while (gameRunning) // Main menu loop
 
 			Enemy enemy;
 
-			if (floor == 1)
+			if (floor == 1) //string name, int maxHp, int minDamage, int maxDamage, int defense
 			{
-				enemy = new Enemy("Goblin", 50, 5, 10, 2);
+				enemy = new Enemy("Goblin", 50, 10, 15, 2); 
 			}
 			else if (floor == 2)
 			{
-				enemy = new Enemy("Skeleton", 70, 7, 13, 3);
+				enemy = new Enemy("Skeleton", 70, 10, 13, 3);
 			}
 			else if (floor == 3)
 			{
-				enemy = new Enemy("Dark Knight", 95, 9, 16, 5);
+				enemy = new Enemy("Dark Knight", 95, 12, 16, 5);
+			}
+			else if (floor == 4)
+			{
+				enemy = new Enemy("Orc Warrior", 115, 10, 18, 6);
+			}
+			else if (floor == 5)
+			{
+				enemy = new Enemy("Shadow Mage", 100, 10, 22, 4);
 			}
 			else
 			{
-				enemy = new Enemy("Boss", 140, 12, 22, 7);
+				enemy = new Enemy("Boss", 200, 10, 20, 8);
 				Console.WriteLine("Boss appears!");
 			}
 
@@ -156,7 +214,7 @@ while (gameRunning) // Main menu loop
 
 			bool playerWon = combatSystem.StartFight(player, enemy);
 
-			if (!playerWon)
+			if (!playerWon) // If the player lost the fight, end the game and show a game over message with the floor they reached
 			{
 				Console.Clear();
 				Console.WriteLine("Game Over!");
@@ -169,7 +227,7 @@ while (gameRunning) // Main menu loop
 
 			Console.Clear();
 
-			if (floor < 4)
+			if (floor < 6) // If the player has cleared a regular floor, allow them to choose a reward and save their progress before moving to the next floor
 			{
 				Console.WriteLine($"Floor {floor} cleared!");
 				Console.WriteLine("You can choose a reward.");
@@ -178,18 +236,28 @@ while (gameRunning) // Main menu loop
 				Console.ReadKey();
 
 				rewardSystem.ChooseReward(player);
+				player.CurrentFloor = floor + 1;
+				saveSystem.SaveGame(player);
+				Console.WriteLine();
+				Console.WriteLine("Press any key to continue to the next floor.");
+				Console.ReadKey();
 			}
-			else
+			else // If the player has defeated the final boss, show a congratulations message and display their final character status before returning to the menu
 			{
-				Console.WriteLine("Congratulations!");
-				Console.WriteLine("You defeated the Final Boss and cleared the dungeon!");
+				Console.Clear();
+				Console.WriteLine("=================================");
+				Console.WriteLine("        🎉 CONGRATULATIONS! 🎉");
+				Console.WriteLine("=================================");
+				Console.WriteLine();
+				Console.WriteLine("🏆 Well done! You defeated the Boss!");
+				Console.WriteLine("⚔️ You cleared all floors and won the game!");
 				Console.WriteLine();
 				Console.WriteLine("Final character status:");
 				Console.WriteLine();
 				player.ShowInfo();
-
 				Console.WriteLine();
-				Console.WriteLine("Press any key to return to the menu.");
+				Console.WriteLine("=================================");
+				Console.WriteLine("Press any key to exit the dungeon...");
 				Console.ReadKey();
 			}
 		}

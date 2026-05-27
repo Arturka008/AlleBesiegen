@@ -14,42 +14,50 @@ namespace AlleBesiegen
 
 			bool playerDefending = false; // Track if player is defending to apply damage reduction
 
+			int round = 1;
+
 			while (player.IsAlive() && enemy.IsAlive())
 			{
-				ShowFightStatus(player, enemy);
+				int enemyAction = random.Next(1, 4);
+				bool validPlayerAction = false;
 
-				Console.WriteLine("Choose your action:");
-				Console.WriteLine("1. ⚔️ Attack");
-				Console.WriteLine("2. 🛡️ Defend");
-				Console.WriteLine("3. 📊 Show player info");
-				Console.Write("Your choice: ");
-
-				string choice = Console.ReadLine();
-
-				if (choice == "1")
-				{
-					PlayerAttack(player, enemy);
-				}
-				else if (choice == "2") // Player chooses to defend, which will reduce damage from the next enemy attack
-				{
-					Console.WriteLine();
-					Console.WriteLine($"🛡️ {player.Name} prepares to defend!");
-					playerDefending = true;
-				}
-				else if (choice == "3")
+				while (!validPlayerAction)
 				{
 					Console.Clear();
-					player.ShowInfo();
-					WaitForKey();
-					Console.Clear();
-					continue;
-				}
-				else
-				{
-					Console.WriteLine("Invalid input!");
-					WaitForKey();
-					Console.Clear();
-					continue;
+
+					ShowFightStatus(player, enemy, round, enemyAction);
+
+					Console.WriteLine("Choose your action:");
+					Console.WriteLine("1. ⚔️ Attack");
+					Console.WriteLine("2. 🛡️ Defend");
+					Console.WriteLine("3. 📊 Show player info");
+					Console.Write("Your choice: ");
+
+					string choice = Console.ReadLine();
+
+					if (choice == "1")
+					{
+						PlayerAttack(player, enemy, enemyAction == 3);
+						validPlayerAction = true;
+					}
+					else if (choice == "2")
+					{
+						Console.WriteLine();
+						Console.WriteLine($"🛡️ {player.Name} prepares to defend!");
+						playerDefending = true;
+						validPlayerAction = true;
+					}
+					else if (choice == "3")
+					{
+						Console.Clear();
+						player.ShowInfo();
+						WaitForKey();
+					}
+					else
+					{
+						Console.WriteLine("Invalid input!");
+						WaitForKey();
+					}
 				}
 
 				if (!enemy.IsAlive())
@@ -57,8 +65,10 @@ namespace AlleBesiegen
 					break;
 				}
 
-				EnemyRandomAction(player, enemy, playerDefending);
+				EnemySelectedAction(player, enemy, playerDefending, enemyAction);
 				playerDefending = false;
+
+				round++;
 
 				WaitForKey();
 				Console.Clear();
@@ -80,11 +90,24 @@ namespace AlleBesiegen
 			}
 		}
 
-		private void PlayerAttack(Player player, Enemy enemy) // Calculate and apply player attack damage
+		private void PlayerAttack(Player player, Enemy enemy, bool enemyDefending) // Calculate and apply player attack damage
 		{
 			int damage = random.Next(player.MinDamage, player.MaxDamage + 1);
 
 			Console.WriteLine();
+
+			if (enemyDefending)
+			{
+				damage = damage / 2;
+
+				if (damage < 1)
+				{
+					damage = 1;
+				}
+
+				Console.WriteLine($"🛡️ {enemy.Name} is defending and reduces your damage!");
+			}
+
 			Console.WriteLine($"⚔️ {player.Name} attacks and deals {damage} base damage!");
 
 			enemy.TakeDamage(damage);
@@ -128,7 +151,7 @@ namespace AlleBesiegen
 			}
 		}
 
-		private void EnemyWeakAttack(Player player, Enemy enemy, bool playerDefending) //
+		private void EnemyWeakAttack(Player player, Enemy enemy, bool playerDefending) 
 		{
 			int damage = random.Next(enemy.MinDamage, enemy.MaxDamage + 1);
 			damage = damage / 2;
@@ -150,7 +173,7 @@ namespace AlleBesiegen
 				player.TakeDamage(damage);
 			}
 		}
-		private void EnemyStrongAttack(Player player, Enemy enemy, bool playerDefending) // Strong attack has a 75% chance to hit and deals more damage than a normal attack( 75% weil es imba ist)
+		private void EnemyStrongAttack(Player player, Enemy enemy, bool playerDefending) // Strong attack has a 75% chance to hit and deals more damage than a normal attack
 		{
 			int hitChance = random.Next(1, 101);
 
@@ -177,19 +200,51 @@ namespace AlleBesiegen
 		}
 		private void EnemyDefend(Enemy enemy) // Enemy increases its defense for the next turn, which will reduce damage taken from the player's next attack
 		{
-			enemy.Defense += 2;
-
 			Console.WriteLine();
-			Console.WriteLine($"🛡️ {enemy.Name} increases defense by 2!");
+			Console.WriteLine($"🛡️ {enemy.Name} increases defended this round!");
 		}
 
-		private void ShowFightStatus(Player player, Enemy enemy) // Display current health of player and enemy
+		private void ShowFightStatus(Player player, Enemy enemy, int round, int enemyAction) // Display current health of player and enemy
 		{
-			Console.WriteLine("========== Fight ==========");
+			Console.WriteLine($"========== Round {round} ==========");
 			Console.WriteLine($"💖 {player.Name}: {player.Health}/{player.MaxHealth} HP");
 			Console.WriteLine($"👹 {enemy.Name}: {enemy.CurrentHp}/{enemy.MaxHp} HP");
+			Console.WriteLine();
+			Console.WriteLine($"Enemy intent: {GetEnemyIntentText(enemyAction)}");
 			Console.WriteLine("===========================");
 			Console.WriteLine();
+		}
+
+		private string GetEnemyIntentText(int enemyAction)
+		{
+			if (enemyAction == 1)
+			{
+				return "Weak Attack";
+			}
+			else if (enemyAction == 2)
+			{
+				return "Strong Attack";
+			}
+			else
+			{
+				return "Defend";
+			}
+		}
+
+		private void EnemySelectedAction(Player player, Enemy enemy, bool playerDefending, int enemyAction)
+		{
+			if (enemyAction == 1)
+			{
+				EnemyWeakAttack(player, enemy, playerDefending);
+			}
+			else if (enemyAction == 2)
+			{
+				EnemyStrongAttack(player, enemy, playerDefending);
+			}
+			else
+			{
+				EnemyDefend(enemy);
+			}
 		}
 
 		private void WaitForKey() 

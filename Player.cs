@@ -20,8 +20,8 @@ namespace AlleBesiegen
 		public int MinDamage { get; set; }
 		public int MaxDamage { get; set; }
 		public int Armor { get; set; }
-		public int Gold { get; set; }
-
+		//public int Gold { get; set; }
+		public int CurrentFloor { get; set; }
 		public Player(string name, HeroClass heroClass) // Constructor to initialize player attributes based on chosen hero class
 		{
 			Name = name;
@@ -32,7 +32,7 @@ namespace AlleBesiegen
 			{
 				MaxHealth = 130;
 				Health = MaxHealth;
-				MinDamage = 12;
+				MinDamage = 16;
 				MaxDamage = 20;
 				Armor = 8;
 			}
@@ -40,7 +40,7 @@ namespace AlleBesiegen
 			{
 				MaxHealth = 90;
 				Health = MaxHealth;
-				MinDamage = 18;
+				MinDamage = 20;
 				MaxDamage = 30;
 				Armor = 3;
 			}
@@ -48,10 +48,12 @@ namespace AlleBesiegen
 			{
 				MaxHealth = 100;
 				Health = MaxHealth;
-				MinDamage = 10;
+				MinDamage = 20;
 				MaxDamage = 25;
 				Armor = 5;
 			}
+
+			CurrentFloor = 1;
 		}
 		public void ShowInfo() // Method to display player information
 		{
@@ -62,6 +64,7 @@ namespace AlleBesiegen
 			Console.WriteLine($"⚔️ Damage: {MinDamage}-{MaxDamage}");
 			Console.WriteLine($"🛡️ Armor: {Armor}");
 			//Console.WriteLine($"💰 Gold: {Gold}");
+			Console.WriteLine($"🏰 Floor: {CurrentFloor}");
 		}
 		public void TakeDamage(int damage) // Method to apply damage to the player, considering armor
 		{
